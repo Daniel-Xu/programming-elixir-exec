@@ -10,4 +10,8 @@ defmodule Star2Test do
   test "normalize 2x3x4" do
     assert normalize_surface("2x3x4") == [2, 3, 4]
   end
+
+  test "ribben 2x3x4" do
+    assert ribben([2, 3, 4]) == 2 * (2 + 3) + (2 * 3 * 4)
+  end
 end
