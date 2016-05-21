@@ -23,15 +23,16 @@ defmodule Star2 do
 
   def ribben(input) do
     max = Enum.max(input)
-    first = input
-    |> List.delete(max)
-    |> Enum.map(&(&1 + &1))
-    |> Enum.reduce(&(&1 + &2))
+    first =
+      input
+      |> List.delete(max)
+      |> Enum.reduce(&(&1 + &2))
 
-    second = input
-    |> Enum.reduce(&(&1 * &2))
+    second =
+      input
+      |> Enum.reduce(&(&1 * &2))
 
-    first + second
+    2 * first + second
   end
 
   def stream_file_paper(name) do
