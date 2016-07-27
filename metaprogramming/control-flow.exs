@@ -1,6 +1,8 @@
 defmodule ControlFlow do
   defmacro myif(expr, do: if_block) do
-    if(expr, do: if_block, else: nil)
+    quote do
+      myif(unquote(expr), do: unquote(if_block), else: nil)
+    end
   end
 
   defmacro myif(expr, do: if_block, else: else_block) do
