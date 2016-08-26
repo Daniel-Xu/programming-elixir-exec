@@ -24,14 +24,21 @@ defmodule Counter do
 
 
   defp loop(current_val) do
-    new_val = receive do
-      :inc -> current_val + 1
-      :dec -> current_val - 1
-      {:val, caller_pid, ref} ->
-        send caller_pid, {ref, current_val}
-        current_val
-    end
+    new_val =
+      receive do
+        message -> proceess_message(current_val, message)
+      end
     loop(new_val)
   end
 
+  defp proceess_message(current_val, :inc) do
+    current_val + 1
+  end
+  defp proceess_message(current_val, :dec) do
+    current_val - 1
+  end
+  defp proceess_message(current_val, {:val, caller_pid, ref}) do
+    send caller_pid, {ref, current_val}
+    current_val
+  end
 end

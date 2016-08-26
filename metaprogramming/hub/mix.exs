@@ -14,7 +14,7 @@ defmodule Hub.Mixfile do
   #
   # Type "mix help compile.app" for more information
   def application do
-    [applications: [:logger, :httpoison]]
+    [applications: [:logger, :httpoison, :timex, :tentacat]]
   end
 
   # Dependencies can be Hex packages:
@@ -28,6 +28,10 @@ defmodule Hub.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [{:poison, "~> 1.3.0"},
-     {:httpoison, "~> 0.9.0"}]
+     {:httpoison, "~> 0.9.0"},
+     {:tentacat, "~> 0.5"},
+     {:timex, "~> 3.0"},
+     {:git_cli, "~> 0.2"},
+     {:apex, "~>0.5.2"}]
   end
 end
