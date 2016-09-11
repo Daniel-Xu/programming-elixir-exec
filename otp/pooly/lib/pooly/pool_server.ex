@@ -22,6 +22,10 @@ defmodule Pooly.PoolServer do
     GenServer.call(name(pool_name), :status)
   end
 
+  def terminate(_reason, _state) do
+    :ok
+  end
+
   # Callbacks
 
   # filter configuration
@@ -48,6 +52,7 @@ defmodule Pooly.PoolServer do
   end
 
   def handle_info(:start_worker_supervisor, state = %{pool_sup: pool_sup, size: size, mfa: mfa, name: name}) do
+    # start woker supervisor
     {:ok, worker_sup} = Supervisor.start_child(pool_sup, supervisor_spec(name, mfa))
     workers = prepopulate(size, worker_sup)
     {:noreply, %{state | worker_sup: worker_sup, workers: workers}}
@@ -63,7 +68,11 @@ defmodule Pooly.PoolServer do
         {:noreply, state}
     end
   end
-  def handle_info({:EXIT, pid, _reason}, state = %{monitors: monitors, workers: workers, worker_sup: worker_sup, pool_sup: pool_sup}) do
+
+  def handle_info({:EXIT, worker_sup, reason}, state = %{worker_sup: worker_sup}) do
+    {:stop, reason, state}
+  end
+  def handle_info({:EXIT, pid, _reason}, state = %{monitors: monitors, workers: workers, pool_sup: pool_sup}) do
     # worker down
     case :ets.lookup(monitors, pid) do
       [{pid, ref}] ->
@@ -74,9 +83,6 @@ defmodule Pooly.PoolServer do
       _ ->
         {:noreply, state}
     end
-  end
-  def handle_info({:EXIT, worker_sup, reason}, state = %{worker_sup: worker_sup}) do
-    {:stop, reason, state}
   end
 
   def handle_call(:checkout, {from_pid, _ref}, %{workers: workers, monitors: monitors} = state) do
@@ -104,13 +110,11 @@ defmodule Pooly.PoolServer do
     end
   end
 
-  def terminate(_reason, _state) do
-    :ok
-  end
-
   # helpers
   defp supervisor_spec(name, mfa) do
-    opts = [id: name <> "WorkerSupervisor", restart: :temporary, shutdown: 10000]
+    # NOTE: The reason this is set to temporary is because the WorkerSupervisor
+    #       is started by the PoolServer.
+    opts = [id: name <> "WorkerSupervisor", shutdown: 10000, restart: :temporary]
     supervisor(Pooly.WorkerSupervisor, [self(), mfa], opts)
   end
 
