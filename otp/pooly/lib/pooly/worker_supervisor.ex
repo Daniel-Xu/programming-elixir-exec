@@ -10,7 +10,10 @@ defmodule Pooly.WorkerSupervisor do
 
   def init([pool_server, {m, f, a}]) do
     Process.link(pool_server)
+
+    # the PoolServer handle the restart of child
     worker_opts = [
+      restart: :temporary,
       shutdown: 5000,
       function: f
     ]
